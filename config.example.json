@@ -1,0 +1,47 @@
+{
+  "providers": [
+    {
+      "id": "prov_gemini",
+      "name": "Gemini",
+      "type": "gemini",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+      "apiKey": "YOUR_GEMINI_API_KEY",
+      "models": [
+        "gemini-2.5-flash"
+      ]
+    },
+    {
+      "id": "prov_siliconflow",
+      "name": "硅基流动",
+      "type": "openai-compatible",
+      "endpoint": "https://api.siliconflow.cn/v1",
+      "apiKey": "YOUR_SILICONFLOW_API_KEY",
+      "models": [
+        "Qwen/Qwen2.5-7B-Instruct"
+      ]
+    }
+  ],
+  "personas": [],
+  "personaOverrides": {
+    "devil": {
+      "providerId": "prov_gemini",
+      "model": "gemini-2.5-flash"
+    },
+    "optimist": {
+      "providerId": "prov_siliconflow",
+      "model": "Qwen/Qwen2.5-7B-Instruct"
+    },
+    "pragmatist": {
+      "providerId": "prov_gemini",
+      "model": "gemini-2.5-flash"
+    },
+    "user_voice": {
+      "providerId": "prov_siliconflow",
+      "model": "Qwen/Qwen2.5-7B-Instruct"
+    },
+    "philosopher": {
+      "providerId": "prov_siliconflow",
+      "model": "Qwen/Qwen2.5-7B-Instruct"
+    }
+  }
+}

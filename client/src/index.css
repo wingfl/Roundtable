@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Base Font Scale ===== */
+@layer base {
+  html {
+    font-size: 19px;
+  }
+}
+
+/* ===== Color Tokens — 参考 Vercel+Linear 混合色板 ===== */
+@layer base {
+  :root {
+    /* 浅色 — 蓝灰底色 */
+    --background: 220 20% 98%;
+    --foreground: 222 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+
+    /* 主色 — Linear 蓝紫 */
+    --primary: 239 52% 63%;
+    --primary-foreground: 0 0% 100%;
+
+    /* 次级 — 暖灰 */
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 222 20% 20%;
+
+    /* 弱化 — 中灰 */
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 8% 46%;
+
+    /* 强调 hover — 更暖 */
+    --accent: 222 15% 92%;
+    --accent-foreground: 222 20% 16%;
+
+    /* 功能色 */
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 0 0% 98%;
+
+    /* 边框 / 输入 */
+    --border: 222 15% 88%;
+    --input: 222 15% 88%;
+    --ring: 239 52% 63%;
+
+    /* 圆角 */
+    --radius: 0.5rem;
+
+    /* 图表面板 */
+    --chart-1: 239 52% 63%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  .dark {
+    /* 深色 — 蓝黑底（层次丰富） */
+    --background: 225 18% 6%;
+    --foreground: 210 20% 95%;
+    --card: 224 16% 9%;
+    --card-foreground: 210 20% 95%;
+    --popover: 224 16% 9%;
+    --popover-foreground: 210 20% 95%;
+
+    /* 主色保持不变（在深色底上更亮） */
+    --primary: 239 55% 68%;
+    --primary-foreground: 0 0% 100%;
+
+    /* 次级 — 蓝灰 */
+    --secondary: 223 14% 14%;
+    --secondary-foreground: 210 20% 92%;
+
+    /* 弱化 */
+    --muted: 223 14% 14%;
+    --muted-foreground: 215 10% 56%;
+
+    /* hover 强调 */
+    --accent: 222 14% 17%;
+    --accent-foreground: 210 20% 92%;
+
+    /* 功能色 */
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 48%;
+    --warning-foreground: 0 0% 98%;
+
+    /* 边框 — 关键：够暗但不隐形 */
+    --border: 223 14% 16%;
+    --input: 223 14% 16%;
+    --ring: 239 55% 68%;
+
+    /* 图表 */
+    --chart-1: 239 55% 68%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 48%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+/* ===== 全局基础样式 ===== */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ===== 自定义工具类 ===== */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+  }
+}
+
+/* ===== Markmap 思维导图深色模式适配 ===== */
+.dark .markmap-node text,
+.dark .markmap-node .markmap-label,
+.dark svg.markmap text {
+  fill: hsl(210 20% 90%) !important;
+}
+.dark .markmap-link {
+  stroke: hsl(223 14% 30%) !important;
+}
+.dark .markmap-circle {
+  fill: hsl(239 55% 68%) !important;
+  stroke: hsl(239 55% 68%) !important;
+}
+.dark .markmap-foreign {
+  color: hsl(210 20% 90%) !important;
+}
