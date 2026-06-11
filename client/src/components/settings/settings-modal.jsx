@@ -58,6 +58,7 @@ export function SettingsModal({ open, onClose }) {
   const [providers, setProviders] = useState([]);
   const [personas, setPersonas] = useState([]);
   const [overrides, setOverrides] = useState({});
+  const [mindmapConfig, setMindmapConfig] = useState({ providerId: "", model: "" });
   const [showEdit, setShowEdit] = useState(false);
   const [editData, setEditData] = useState(null);
   const [editType, setEditType] = useState("");
@@ -71,16 +72,22 @@ export function SettingsModal({ open, onClose }) {
           setProviders(cfg.providers || []);
           setOverrides(cfg.personaOverrides || {});
           setPersonas(applyOverrides(DEFAULT_PERSONAS, cfg.personaOverrides));
+          setMindmapConfig(cfg.mindmapProvider || { providerId: "", model: "" });
         }
       });
     }
   }, [open, loadConfig]);
 
   const save = useCallback(async () => {
-    const cfg = { providers, personas: [], personaOverrides: overrides };
+    const cfg = { 
+      providers, 
+      personas: [], 
+      personaOverrides: overrides,
+      mindmapProvider: mindmapConfig 
+    };
     await api.saveConfig(cfg);
     loadConfig();
-  }, [providers, overrides, loadConfig]);
+  }, [providers, overrides, mindmapConfig, loadConfig]);
 
   const openProviderEdit = (prov = null) => {
     setEditType("provider");
@@ -217,6 +224,7 @@ export function SettingsModal({ open, onClose }) {
             <TabsList className="h-9 shrink-0">
               <TabsTrigger value="providers" className="text-sm">AI 模型</TabsTrigger>
               <TabsTrigger value="personas" className="text-sm">角色管理</TabsTrigger>
+              <TabsTrigger value="mindmap" className="text-sm">思维导图</TabsTrigger>
             </TabsList>
 
             <div className="flex-1 min-h-0 mt-2">
@@ -298,6 +306,86 @@ export function SettingsModal({ open, onClose }) {
               )}
             </div>
           </Tabs>
+
+          {tab === "mindmap" && (
+            <div className="h-full flex flex-col gap-4">
+              <div className="text-sm text-muted-foreground">
+                配置用于生成思维导图的 AI 模型。建议使用响应快速、成本较低的模型。
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-sm">选择模型供应商</Label>
+                  <Select 
+                    value={mindmapConfig.providerId || "none"} 
+                    onValueChange={(v) => {
+                      if (v === "none") {
+                        setMindmapConfig({ providerId: "", model: "" });
+                      } else {
+                        const selectedProv = providers.find((p) => p.id === v);
+                        const defaultModel = selectedProv?.models?.[0] || "";
+                        setMindmapConfig({ providerId: v, model: defaultModel });
+                      }
+                    }}
+                  >
+                    <SelectTrigger><SelectValue placeholder="选择模型供应商" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">未配置（使用默认）</SelectItem>
+                      {providers.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">模型名称</Label>
+                  <Input 
+                    value={mindmapConfig.model || ""} 
+                    onChange={(e) => setMindmapConfig({ ...mindmapConfig, model: e.target.value })} 
+                    placeholder="例如: Qwen/Qwen2.5-7B-Instruct" 
+                  />
+                  {mindmapConfig.providerId && (
+                    <p className="text-xs text-muted-foreground">
+                      可用模型: {providers.find(p => p.id === mindmapConfig.providerId)?.models?.join(", ") || "无"}
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={async () => {
+                      await save();
+                      alert("保存成功！");
+                    }} 
+                    className="flex-1"
+                  >
+                    保存配置
+                  </Button>
+                  {mindmapConfig.providerId && (
+                    <Button 
+                      variant="outline" 
+                      onClick={async () => {
+                        try {
+                          const res = await api.testConnection(mindmapConfig.providerId);
+                          alert(res.ok ? "连接成功！" : "连接失败: " + res.error);
+                        } catch (e) {
+                          alert("测试失败: " + e.message);
+                        }
+                      }}
+                    >
+                      测试连接
+                    </Button>
+                  )}
+                </div>
+                <div className="rounded-lg border p-4 bg-muted/50">
+                  <h4 className="text-sm font-medium mb-2">配置说明</h4>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 如果未配置，将使用第一个发言角色的模型生成思维导图</li>
+                    <li>• 建议选择响应快速、支持长文本的模型</li>
+                    <li>• 硅基流动的 Qwen2.5-7B-Instruct 是性价比不错的选择</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

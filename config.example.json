@@ -43,5 +43,9 @@
       "providerId": "prov_siliconflow",
       "model": "Qwen/Qwen2.5-7B-Instruct"
     }
+  },
+  "mindmapProvider": {
+    "providerId": "prov_siliconflow",
+    "model": "Qwen/Qwen2.5-7B-Instruct"
   }
 }

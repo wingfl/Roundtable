@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Trash2, Clock, Users, MessageSquare } from "lucide-react";
 import { useSession } from "../../hooks/use-session";
+import { useToast } from "../../hooks/use-toast";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { ScrollArea } from "../ui/scroll-area";
@@ -15,15 +16,17 @@ function formatDate(iso) {
 
 export function HistorySidebar({ visible, width = 260, onClose }) {
   const { historyList, currentHistoryId, loadHistory, viewHistory, deleteHistory, resetSession } = useSession();
+  const toast = useToast();
 
   useEffect(() => {
     if (visible) loadHistory();
   }, [visible, loadHistory]);
 
-  const handleDelete = async (e, id) => {
+  const handleDelete = async (e, item) => {
     e.stopPropagation();
-    const isCurrent = id === currentHistoryId;
-    await deleteHistory(id);
+    const isCurrent = item.id === currentHistoryId;
+    await deleteHistory(item.id);
+    toast({ title: "已删除", description: `"${item.topic}" 已从历史记录中移除`, duration: 3000 });
     if (isCurrent) {
       resetSession();
     } else {
@@ -68,7 +71,7 @@ export function HistorySidebar({ visible, width = 260, onClose }) {
                       variant="ghost"
                       size="icon-sm"
                       className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
-                      onClick={(e) => handleDelete(e, item.id)}
+                      onClick={(e) => handleDelete(e, item)}
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>

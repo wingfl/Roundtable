@@ -192,13 +192,21 @@ async function executeRound() {
 
     // 每轮后更新思维导图
     try {
+      console.log('[mindmap] 开始更新思维导图, round=' + session.round + ', persona=' + (session.personas[0]?.name || 'none'));
       const md = await orchestrator.updateMindmap(session);
       if (md) {
         session.mindmap = md;
+        console.log('[mindmap] 更新成功, 长度=' + md.length);
         io.emit('mindmap_updated', { markdown: md });
+      } else {
+        console.log('[mindmap] updateMindmap 返回空，保持当前思维导图');
+        // 即使失败也通知前端，避免前端一直显示旧状态
+        if (session.mindmap) {
+          io.emit('mindmap_updated', { markdown: session.mindmap, unchanged: true });
+        }
       }
     } catch (e) {
-      console.error('Mindmap update failed:', e.message);
+      console.error('Mindmap update failed:', e.message, e.stack);
     }
 
     // 自动模式：马不停蹄继续
@@ -232,6 +240,7 @@ function finishAutoDebate() {
   clearAutoTimer();
   session.status = 'converging';
   session.running = false;
+  session.mode = 'human-led';
 
   // 保存历史记录
   if (session.topic && session.messages.length > 0) {
@@ -240,7 +249,7 @@ function finishAutoDebate() {
     } catch (e) { console.error('保存历史记录失败:', e.message); }
   }
 
-  io.emit('status_changed', { status: 'converging' });
+  io.emit('status_changed', { status: 'converging', mode: 'human-led' });
   orchestrator.emitSystem(io, session,
     `自动讨论完成，共 ${session.round} 轮。` +
     (session.round >= session.maxRounds ? '已达到轮数上限。' : '') +
@@ -273,6 +282,8 @@ function saveHistoryEntry() {
     const rec = historyStore.add(entry);
     currentHistoryId = rec.id;
   }
+  // 通知所有客户端历史列表已更新
+  io.emit('history_list_updated', historyStore.list());
 }
 
 // ---- 脑暴控制 API ----
@@ -327,6 +338,7 @@ app.post('/api/brainstorm/stop', (req, res) => {
   clearAutoTimer();
   session.running = false;
   session.status = 'converging';
+  session.mode = 'human-led';
 
   // 保存历史记录
   if (session.topic && session.messages.length > 0) {
@@ -335,7 +347,7 @@ app.post('/api/brainstorm/stop', (req, res) => {
     } catch (e) { console.error('保存历史记录失败:', e.message); }
   }
 
-  io.emit('status_changed', { status: 'converging' });
+  io.emit('status_changed', { status: 'converging', mode: 'human-led' });
   orchestrator.emitSystem(io, session, '⏹ 讨论已暂停。你可以继续或重新开始。');
   res.json({ ok: true });
 });
@@ -418,6 +430,7 @@ io.on('connection', (socket) => {
       persona: { id: 'user', name: '你', emoji: '💬', color: '#adb5bd', role: 'host' },
       content: data.content,
       type: 'user',
+      round: session.round + 1, // 即将触发的轮次
       timestamp: Date.now()
     };
     session.messages.push(msg);

@@ -31,6 +31,7 @@ export function ChatPanel() {
     startAuto,
     stopDebate,
     resumeAuto,
+    startHumanRound,
   } = useSession();
 
   const [input, setInput] = useState("");
@@ -61,12 +62,19 @@ export function ChatPanel() {
   const handleModeChange = useCallback(
     (val) => {
       if (val === "auto" && status !== "brainstorming") {
+        // 切换到自动：直接启动
         startAuto();
-      } else if (val === "human-led" && status === "brainstorming") {
-        stopDebate();
+      } else if (val === "human-led" && mode !== "human-led") {
+        // 切换到人为主导：如果在运行中就停止，不在运行中直接改模式
+        if (status === "brainstorming") {
+          stopDebate();
+        } else {
+          // converging/ready 但 mode 还是 auto，仅需切换模式
+          startHumanRound();
+        }
       }
     },
-    [status, startAuto, stopDebate]
+    [status, mode, startAuto, stopDebate]
   );
 
   return (

@@ -73,14 +73,7 @@ export function TopBar({ onOpenSettings, onOpenSetup, onToggleHistory }) {
           </TooltipTrigger>
           <TooltipContent>全局设置</TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <ThemeToggle />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>切换主题</TooltipContent>
-        </Tooltip>
+        <ThemeToggle />
       </div>
     </header>
   );

@@ -61,7 +61,7 @@ export function MindmapPanel({ width = 280 }) {
       setCollapsed(false);
     } else {
       if (panelRef.current) {
-        setPrevWidth(panelRef.current.style.width || panelRef.current.offsetWidth + "px");
+        setPrevWidth(panelRef.current.getBoundingClientRect().width + "px");
       }
       setCollapsed(true);
     }
@@ -79,8 +79,8 @@ export function MindmapPanel({ width = 280 }) {
   };
 
   useEffect(() => {
-    if (!collapsed && prevWidth && panelRef.current) {
-      panelRef.current.style.width = prevWidth;
+    if (!collapsed) {
+      // 展开后重新适配思维导图尺寸
       setTimeout(() => {
         mmRef.current?.fit();
       }, 350);
@@ -88,19 +88,19 @@ export function MindmapPanel({ width = 280 }) {
   }, [collapsed]);
 
   return (
-    <>
+    <div className="relative flex-shrink-0 self-stretch">
       <div
         ref={panelRef}
         className={cn(
-          "border-l flex flex-col flex-shrink-0 transition-all duration-300 overflow-hidden",
-          collapsed ? "w-0 border-l-0" : ""
+          "border-l flex flex-col transition-all duration-300 h-full",
+          collapsed ? "border-l-0 translate-x-full" : "translate-x-0"
         )}
-        style={collapsed ? {} : { width: `${width}px` }}
+        style={collapsed ? { width: `${width}px`, marginRight: `-${width}px` } : { width: `${width}px` }}
       >
         <div className="h-10 border-b flex items-center justify-between px-3 flex-shrink-0">
           <div className="flex items-center gap-2">
             <GitBranch className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium">思维导图</span>
+            <span className="text-xs font-medium whitespace-nowrap">思维导图</span>
           </div>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon-sm" onClick={exportMindmap} disabled={!mindmap} title="导出">
@@ -126,12 +126,12 @@ export function MindmapPanel({ width = 280 }) {
       {collapsed && (
         <button
           onClick={toggleCollapse}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-card border rounded-l-md px-1.5 py-4 shadow-sm hover:bg-accent transition-colors z-10"
+          className="absolute right-0 top-4 bg-card border rounded-l-md px-1.5 py-4 shadow-md hover:bg-accent transition-colors z-30"
           title="展开思维导图"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" />
         </button>
       )}
-    </>
+    </div>
   );
 }

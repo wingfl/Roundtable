@@ -63,7 +63,7 @@ function sessionReducer(state, action) {
     case "SET_HISTORY":
       return { ...state, historyList: action.payload };
     case "RESET":
-      return { ...state, ...initialState, connected: state.connected, config: state.config };
+      return { ...state, ...initialState, connected: state.connected, config: state.config, historyList: state.historyList };
     case "SET_MINDMAP":
       return { ...state, mindmap: action.payload };
     default:
@@ -115,6 +115,10 @@ export function SessionProvider({ children }) {
       });
     });
 
+    const cleanup8 = on("history_list_updated", (list) => {
+      dispatch({ type: "SET_HISTORY", payload: list });
+    });
+
     return () => {
       cleanup();
       cleanup2();
@@ -123,6 +127,7 @@ export function SessionProvider({ children }) {
       cleanup5();
       cleanup6();
       cleanup7();
+      cleanup8();
     };
   }, [on]);
 
@@ -178,6 +183,10 @@ export function SessionProvider({ children }) {
     await api.resumeAuto();
   }, []);
 
+  const startHumanRound = useCallback(async () => {
+    await api.startHumanRound();
+  }, []);
+
   const loadHistory = useCallback(async () => {
     try {
       const list = await api.getHistory();
@@ -215,6 +224,7 @@ export function SessionProvider({ children }) {
     startAuto,
     stopDebate,
     resumeAuto,
+    startHumanRound,
     loadHistory,
     viewHistory,
     deleteHistory,

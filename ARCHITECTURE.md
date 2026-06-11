@@ -367,3 +367,59 @@ const providers = {
 | 拖拽性能 | 使用原生 DOM 操作，脱离 React render 循环 |
 | 前端消息列表 | 不做虚拟滚动（消息量小，最多几百条） |
 | 历史记录上限 | 100 条，`history.json` 大小控制在数 MB |
+
+---
+
+## 11. 思维导图模型配置
+
+### 11.1 配置方式
+
+思维导图生成使用独立的模型配置，允许用户指定专用的 AI 模型来生成思维导图。
+
+**配置优先级**：
+1. 优先使用 `config.json` 中的 `mindmapProvider` 配置
+2. 如果未配置，使用第一个发言角色的模型（向后兼容）
+
+**配置示例**：
+```json
+{
+  "mindmapProvider": {
+    "providerId": "prov_siliconflow",
+    "model": "Qwen/Qwen2.5-7B-Instruct"
+  }
+}
+```
+
+### 11.2 技术实现
+
+思维导图生成逻辑在 `lib/orchestrator.js` 的 `updateMindmap()` 函数中：
+
+```javascript
+async function updateMindmap(session) {
+  const cfg = configStore.load();
+  
+  // 优先使用专用思维导图模型配置
+  let providerCfg = null;
+  let model = null;
+  
+  if (cfg.mindmapProvider && cfg.mindmapProvider.providerId) {
+    providerCfg = cfg.providers.find(p => p.id === cfg.mindmapProvider.providerId);
+    model = cfg.mindmapProvider.model;
+  }
+  
+  // 如果没有专用配置，使用第一个角色的模型
+  if (!providerCfg) {
+    const persona = session.personas[0];
+    providerCfg = cfg.providers.find(p => p.id === persona.providerId);
+    model = persona.model;
+  }
+  
+  // 调用 AI 生成思维导图...
+}
+```
+
+### 11.3 推荐配置
+
+- **硅基流动 Qwen2.5-7B-Instruct**：响应快速、成本低、支持长文本
+- **Gemini Flash**：免费、响应快，但需要代理访问
+- **避免使用**：慢速模型或高成本模型（思维导图生成是高频操作）

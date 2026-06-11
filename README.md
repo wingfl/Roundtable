@@ -158,11 +158,17 @@ brainstorm-tool/
   ],
   "personaOverrides": {
     "devil": { "providerId": "prov_xxx", "model": "deepseek-chat" }
+  },
+  "mindmapProvider": {
+    "providerId": "prov_xxx",
+    "model": "deepseek-chat"
   }
 }
 ```
 
-**注意**：`personaOverrides` 只应包含供应商和模型的分配，角色设定由 `lib/personas.js` 内置预设统一管理。自定义角色的 `personality` 字段可以直接写在覆盖中。
+**注意**：
+- `personaOverrides` 只应包含供应商和模型的分配，角色设定由 `lib/personas.js` 内置预设统一管理。自定义角色的 `personality` 字段可以直接写在覆盖中。
+- `mindmapProvider` 是可选字段，用于指定生成思维导图的专用模型。如果未配置，将使用第一个发言角色的模型。建议选择响应快速、成本较低的模型（如硅基流动的 Qwen2.5-7B-Instruct）。
 
 ---
 
